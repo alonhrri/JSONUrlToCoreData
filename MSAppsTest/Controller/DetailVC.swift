@@ -6,16 +6,16 @@
 //  Copyright © 2019 Alon Harari. All rights reserved.
 //
 
-
+//MARK: - Frameworks
 import Foundation
 import UIKit
 import CoreData
-
+//MARK: - Class
 class DetailVC: UIViewController {
     
     
 
-    
+//MARK: - IBOutlet
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var yearLabel: UILabel!
     @IBOutlet weak var ratingLabel: UILabel!
@@ -23,16 +23,22 @@ class DetailVC: UIViewController {
     @IBOutlet weak var photoImageView: UIImageView!
     
     
-    //stored property (*explicitly unwrapped)
+//MARK: - Properties of class
     var movie: Movie!
 
 
     
-    
+//MARK: - ViewController LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(movie)
+        
         self.title = "Movie Details"
+        setupView()
+    }
+// MARK: - Private methods
+
+    fileprivate func setupView() {
+        
         if let title = movie.title {
             self.titleLabel.text = title
         }
@@ -49,25 +55,7 @@ class DetailVC: UIViewController {
             }
             self.genreLabel.text = str
         }
+    }
+    
 
-        //self.genreLabel.text = movie.genre[0]
-        
-    }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-    
-    /*
-     // MARK: - Navigation
-     
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-     // Get the new view controller using segue.destinationViewController.
-     // Pass the selected object to the new view controller.
-     }
-     */
-    
 }

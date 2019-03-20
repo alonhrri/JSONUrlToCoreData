@@ -6,17 +6,17 @@
 //  Copyright © 2019 Alon Harari. All rights reserved.
 //
 
-
+//MARK: - Frameworks
 import UIKit
 import CoreData
+import JGProgressHUD
 
+//MARK: - Class
 class MovieVC: UITableViewController {
     
     
 
-    
-    
-
+//MARK: - Properties of class
     lazy var fetchedhResultController: NSFetchedResultsController<NSFetchRequestResult> = {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: String(describing: Movie.self))
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "releaseYear", ascending: false)]
@@ -24,6 +24,52 @@ class MovieVC: UITableViewController {
         frc.delegate = self
         return frc
     }()
+    fileprivate let hud = JGProgressHUD(style: .dark)
+    private let cellID = "cellID"
+//MARK: - ViewController LifeCycle
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        hud.textLabel.text = "Loading"
+        
+        hud.show(in: view)
+        clearData()
+        //tableView.tableHeaderView = nil
+        //view.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+        updateTableContent()
+        
+    }
+    
+    
+    
+    
+    
+    // MARK: - Private methods
+    func updateTableContent(){
+
+        do {
+            try self.fetchedhResultController.performFetch()
+        } catch let error  {
+            self.hud.dismiss()
+            print("ERROR: \(error)")
+        }
+        
+        
+        let service = APIService()
+        service.getDataWithStaticJSONurl{ (result) in
+            switch result {
+            case .Success(let data):
+                self.clearData()
+                self.saveInCoreDataWith(array: data)
+            //print(data)
+            case .Error(let message):
+                DispatchQueue.main.async {
+                    self.showAlertWith(title: "Error", message: message)
+                }
+            }
+        }
+    }
+    
     private func clearData() {
         do {
             let context = CoreDataStack.sharedInstance.persistentContainer.viewContext
@@ -40,7 +86,6 @@ class MovieVC: UITableViewController {
     
     
     
-    private let cellID = "cellID"
     func showAlertWith(title: String, message: String, style: UIAlertController.Style = .alert) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: style)
         let action = UIAlertAction(title: title, style: .default) { (action) in
@@ -69,43 +114,42 @@ class MovieVC: UITableViewController {
             print(error)
         }
     }
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        tableView.tableHeaderView = nil
 
-        //self.title = "Movie List"
-        view.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
-        
-        //tableView.register(MovieCell.self, forCellReuseIdentifier: cellID)
-        updateTableContent()
-        
+
+ 
+    
+}
+
+
+//MARK: - NSFetchedResults delegate Extension
+extension MovieVC: NSFetchedResultsControllerDelegate {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        self.hud.dismiss()
+
+        switch type {
+        case .insert:
+            self.tableView.insertRows(at: [newIndexPath!], with: .automatic)
+        case .delete:
+            self.tableView.deleteRows(at: [indexPath!], with: .automatic)
+        default:
+            break
+        }
     }
-    func updateTableContent(){
-       
-        do {
-            try self.fetchedhResultController.performFetch()
-            print("COUNT FETCHED FIRST: \(self.fetchedhResultController.sections?[0].numberOfObjects)")
-        } catch let error  {
-            print("ERROR: \(error)")
-        }
-        
-        
-        let service = APIService()
-        service.getDataWith { (result) in
-            switch result {
-            case .Success(let data):
-                self.clearData()
-                self.saveInCoreDataWith(array: data)
-            //print(data)
-            case .Error(let message):
-                DispatchQueue.main.async {
-                    self.showAlertWith(title: "Error", message: message)
-                }
-            }
-        }
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        self.tableView.endUpdates()
+    }
+    
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        tableView.beginUpdates()
     }
     
 
+}
+
+//MARK: - TableView delegate Extension
+extension MovieVC {
+    
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! MovieCell
         if let movie = fetchedhResultController.object(at: indexPath) as? Movie {
@@ -131,94 +175,39 @@ class MovieVC: UITableViewController {
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return view.frame.width + 30 //60 = sum of labels height
     }
-    
-}
-
-func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-    
-    let headerHeight: CGFloat
-    
-    switch section {
-    case 0:
-        // hide the header
-        headerHeight = CGFloat.leastNonzeroMagnitude
-    default:
-        headerHeight = 21
-    }
-    
-    return headerHeight
-}
-extension MovieVC: NSFetchedResultsControllerDelegate {
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        switch type {
-        case .insert:
-            self.tableView.insertRows(at: [newIndexPath!], with: .automatic)
-        case .delete:
-            self.tableView.deleteRows(at: [indexPath!], with: .automatic)
-        default:
-            break
-        }
-    }
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        self.tableView.endUpdates()
-    }
-    
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        tableView.beginUpdates()
-    }
-    
-    //static let mySegueName = "toEdit"
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //1) get the movie
         if let movie = fetchedhResultController.object(at: indexPath) as? Movie {
             //2) performSegue*(
-
             performSegue(withIdentifier: "toDetail", sender: movie)
-
         }
-
     }
-    
-    // MARK: - Navigation
+    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        
+        let headerHeight: CGFloat
+        
+        switch section {
+        case 0:
+            // hide the header
+            headerHeight = CGFloat.leastNonzeroMagnitude
+        default:
+            headerHeight = 21
+        }
+        
+        return headerHeight
+    }
+}
+
+// MARK: - Navigation Delegate Extension
+extension MovieVC {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "toDetail" {
             if let detailVC = segue.destination as? DetailVC {
-                let row = tableView.indexPathForSelectedRow!.row
-                detailVC.movie = sender as! Movie
+                detailVC.movie = sender as? Movie
             }
         }
     }
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-//        if segue.destination is DetailVC
-//        {
-//            let vc = segue.destination as? DetailVC
-//            //vc?.fuck = "fuck!!!!!!"
-//            if let movie = sender as? Movie
-//            {
-//
-//                vc?.title = movie.title
-//                vc?._rating = movie.rating
-//                vc?._img = movie.image
-//                vc?._genre = movie.genre as! [String]
-//                vc?._year = movie.releaseYear
-//
-//
-//            }
-//        }
-//
-//
-//    }
-    
-    
-    
-    
-    
 }
-
-
-
-
 
 
 

@@ -14,16 +14,17 @@
         <scene sceneID="Lc0-Z5-qlW">
             <objects>
                 <tableViewController storyboardIdentifier="movieVC" id="e61-T1-Gpp" customClass="MovieVC" customModule="MSAppsTest" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="99I-11-co9">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" springLoaded="YES" id="99I-11-co9">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="sectionIndexBackgroundColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="cellID" rowHeight="288" id="J3H-Hx-a5v" customClass="MovieCell" customModule="MSAppsTest" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="28" width="375" height="288"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="J3H-Hx-a5v" id="lVs-rY-reY">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="287.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="288"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="CP4-Sh-yLB">
@@ -50,7 +51,7 @@
                                             </subviews>
                                         </stackView>
                                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="fw4-xK-YFe">
-                                            <rect key="frame" x="0.0" y="71" width="375" height="216.5"/>
+                                            <rect key="frame" x="0.0" y="71" width="375" height="217"/>
                                         </imageView>
                                     </subviews>
                                     <constraints>
@@ -63,6 +64,7 @@
                                         <constraint firstItem="fw4-xK-YFe" firstAttribute="leading" secondItem="lVs-rY-reY" secondAttribute="leading" id="syN-2M-oj3"/>
                                     </constraints>
                                 </tableViewCellContentView>
+                                <color key="backgroundColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <connections>
                                     <outlet property="photoImageview" destination="fw4-xK-YFe" id="A92-A0-NYy"/>
                                     <outlet property="titleLabel" destination="j3s-Nu-gro" id="8Jt-RT-3cC"/>

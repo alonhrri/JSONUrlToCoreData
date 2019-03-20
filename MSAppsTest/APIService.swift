@@ -5,16 +5,20 @@
 //  Created by Alon Harari on 13/03/2019.
 //  Copyright © 2019 Alon Harari. All rights reserved.
 //
-
+//MARK: - Frameworks
 import Foundation
-
+//MARK: - Class
 class APIService: NSObject {
-    let query = "dogs"
-    //lazy var endPoint: String = { return "https://api.flickr.com/services/feeds/photos_public.gne?format=json&tags=\(self.query)&nojsoncallback=1#" }()
-    lazy var endPoint: String = {return "https://api.androidhive.info/json/movies.json" }()
-    
-    func getDataWith(completion: @escaping (Result<[[String: AnyObject]]>) -> Void) {
-        guard let url = URL(string: endPoint) else { return completion(.Error("Invalid URL, we can't update your feed")) }
+//MARK: - Properties of class
+
+    enum Result <T>{
+        case Success(T)
+        case Error(String)
+    }
+    lazy var staticJSONurl: String = {return "https://api.androidhive.info/json/movies.json" }()
+    // MARK: - Private methods
+    func getDataWithStaticJSONurl(completion: @escaping (Result<[[String: AnyObject]]>) -> Void) {
+        guard let url = URL(string: staticJSONurl) else { return completion(.Error("Invalid URL, we can't update your feed")) }
         URLSession.shared.dataTask(with: url) { (data, response, error) in
             guard error == nil else { return completion(.Error(error!.localizedDescription)) }
             guard let data = data else { return completion(.Error(error?.localizedDescription ?? "There are no new Movies to show"))
@@ -56,8 +60,5 @@ class APIService: NSObject {
     
     
 }
-enum Result <T>{
-    case Success(T)
-    case Error(String)
-}
+
 

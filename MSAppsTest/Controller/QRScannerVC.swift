@@ -5,21 +5,24 @@
 //  Created by Alon Harari on 14/03/2019.
 //  Copyright © 2019 Alon Harari. All rights reserved.
 //
-
+//MARK: - Frameworks
 import UIKit
 import AVFoundation
 import CoreData
-
+//MARK: - Class
 class QRScannerVC: UIViewController, AVCaptureMetadataOutputObjectsDelegate{
 
-    
+//MARK: - IBOutlet
+
     @IBOutlet weak var square: UIImageView!
+//MARK: - Properties of class
+
     var video = AVCaptureVideoPreviewLayer()
-    
+    let session = AVCaptureSession()
+//MARK: - ViewController LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let session = AVCaptureSession()
         guard let captureDevice = AVCaptureDevice.default(for: AVMediaType.video) else {return}
         do {
             
@@ -43,6 +46,9 @@ class QRScannerVC: UIViewController, AVCaptureMetadataOutputObjectsDelegate{
         
         session.startRunning()
     }
+    
+    // MARK: - Private methods
+
     private func createMovieEntityFrom(dictionary: [String: AnyObject]) -> NSManagedObject? {
         let context = CoreDataStack.sharedInstance.persistentContainer.viewContext
         if let movieEntity = NSEntityDescription.insertNewObject(forEntityName: "Movie", into: context) as? Movie {
@@ -73,14 +79,18 @@ class QRScannerVC: UIViewController, AVCaptureMetadataOutputObjectsDelegate{
         self.present(alertController, animated: true, completion: nil)
     }
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-        if metadataObjects != nil && metadataObjects.count != 0
+        if  metadataObjects.count != 0
         {
             if let object = metadataObjects[0] as? AVMetadataMachineReadableCodeObject
             {
                 if object.type == AVMetadataObject.ObjectType.qr
                 {
                     let alert = UIAlertController(title: "QR Code", message: object.stringValue, preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "Retake", style: .default, handler: nil))
+                    alert.addAction(UIAlertAction(title: "Retake", style: .default, handler: {(nil)  in
+                        self.navigationController?.popViewController(animated: true)
+
+                        
+                    }))
                     alert.addAction(UIAlertAction(title: "Copy", style: .default, handler: {(nil) in
                         UIPasteboard.general.string = object.stringValue
                         if let qrUrl = object.stringValue {
@@ -90,10 +100,7 @@ class QRScannerVC: UIViewController, AVCaptureMetadataOutputObjectsDelegate{
                                 switch result {
                                 case .Success(let data):
                                     DispatchQueue.main.async {
-
-                                    //self.clearData()
                                     self.saveInCoreDataWith(array: data)
-                                        //print(data)
                                     }
                                 case .Error(let message):
                                     DispatchQueue.main.async {
@@ -103,34 +110,14 @@ class QRScannerVC: UIViewController, AVCaptureMetadataOutputObjectsDelegate{
                             }
                         }
 
+                        self.navigationController?.popViewController(animated: true)
+
                     }))
-                    present(alert, animated: true, completion: nil)
-                    
-                    
+                   present(alert, animated: true, completion: nil)
+                    self.session.stopRunning()
+
                 }
             }
         }
     }
-//    func captureOutput(_captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects:[Any]!, from connection: AVCaptureConnection!)
-//    {
-//
-//        if metadataObjects != nil && metadataObjects.count != 0
-//        {
-//            if let object = metadataObjects[0] as? AVMetadataMachineReadableCodeObject
-//            {
-//                if object.type == AVMetadataObject.ObjectType.qr
-//                {
-//                    let alert = UIAlertController(title: "QR Code", message: object.stringValue, preferredStyle: .alert)
-//                    alert.addAction(UIAlertAction(title: "Retake", style: .default, handler: nil))
-//                    alert.addAction(UIAlertAction(title: "Copy", style: .default, handler: {(nil) in
-//                        UIPasteboard.general.string = object.stringValue
-//                    }))
-//                    present(alert, animated: true, completion: nil)
-//
-//
-//                }
-//            }
-//        }
-//    }
-
 }
